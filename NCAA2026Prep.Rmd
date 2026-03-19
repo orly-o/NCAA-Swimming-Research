@@ -50,43 +50,20 @@ count_current_record_plot = plot_ly(
   x = ~Count,
   y = ~Team,
   type = 'bar',
-  marker = list(
-    color = '#014F86'
-  ),
-  orientation = 'h'
-) %>%
+  marker = list(color = '#014F86'),
+  orientation = 'h') %>%
   layout(
-    title = list(
-      text = "Current Individual NCAA Records by School (M&F)",
-      font = list(
-        size = 24
-      ),
-      y = .99
-    ),
-    xaxis = list(
-      title = list(
-        text = "Records",
-        font = list(
-          size = 20
-        )
-    ),
-    tickfont = list(
-        size = 15
-      )
-    ),
-    yaxis = list(
-      title = list(
-        text = "Team",
-        font = list(
-          size = 20
-        ),
-        standoff = 10
-      ),
-      tickfont = list(
-        size = 15
-      )
+    title = list(text = "Current Individual NCAA Records by School (M&F)",
+                 font = list(size = 24),
+                 y = .99),
+    xaxis = list(title = list(text = "Records",
+                              font = list(size = 20)),
+    tickfont = list(size = 15)),
+    yaxis = list(title = list(text = "Team",
+                              font = list(size = 20),
+                              standoff = 10),
+                 tickfont = list(size = 15))
     )
-  )
 count_current_record_plot
 ```
 
@@ -157,7 +134,13 @@ Source:
 # time_comparison
 ```
 
-Women's 100s
+```{r}
+# plot colors
+swim_colors = c("Start" = "#014F86", "Midpoint" = "#28BB8E", "End" = "#0284C7")
+
+```
+
+Women's 100s! There are just two lines for the 100 free and 100 fly - Gretchen Walsh set the records in NCAAs last year, so the lines overlap.
 
 ```{r}
 # find start and end points (lo and hi)
@@ -165,29 +148,171 @@ line_data_f_100s = prep26_f_100s %>%
   group_by(Event) %>%
   summarize(start = min(Time2), end = max(Time2))
 
-# 3. Create the Plot
+# set up tick marks
+tick_seconds_f1 = seq(44, 61, by = 3)
+tick_labels_f1 = paste0(floor(tick_seconds_f1 / 60), ":",
+                        sprintf("%02d", tick_seconds_f1 %% 60))
+
+# plot
 time_comparison_f_100s = plot_ly() %>%
   add_segments(
     data = line_data_f_100s,
     x = ~start, xend = ~end,
     y = ~Event, yend = ~Event,
     showlegend = FALSE,
-    line = list(color = "#A9A9A9", width = 2)
+    line = list(color = "#A9A9A9", width = 4)
   ) %>%
   add_markers(
     data = prep26_f_100s,
     x = ~Time2,
     y = ~Event,
     color = ~Tag,
-    marker = list(symbol = "line-ns", size = 20, line = list(width = 3))
+    marker = list(symbol = "line-ns", size = 20, line = list(width = 6))
   ) %>%
   layout(
-    title = list(
-      text = "Time Comparison: Women's 100s",
-      y = .99),
-    xaxis = list(title = "Time"),
-    yaxis = list(title = ""),
+    title = list(text = "Time Comparison: Women's 100s",
+                 font = list(size = 24),
+                 y = .99),
+    xaxis = list(title = list(text = "Time (M:SS)",
+                              font = list(size = 20)),
+                 tickvals = tick_seconds_f1,
+                 ticktext = tick_labels_f1,
+                 tickfont = list(size = 15)),
+    yaxis = list(title = "",
+                 tickfont = list(size = 15)),
     margin = list(l = 100))
 time_comparison_f_100s
 ```
+
+Men's 100s.
+
+Josh Liendo equalled his own record this season, causing an overlap in the 100 fly. Hubi Kos set his record at NCAA finals last year, causing the overlap in the 100 back.
+
+```{r}
+line_data_m_100s = prep26_m_100s %>%
+  group_by(Event) %>%
+  summarize(start = min(Time2), end = max(Time2))
+
+tick_seconds_m1 = seq(40, 60, by = 3)
+tick_labels_m1 = paste0(floor(tick_seconds_m1 / 60), ":",
+                        sprintf("%02d", tick_seconds_m1 %% 60))
+
+time_comparison_m_100s = plot_ly() %>%
+  add_segments(
+    data = line_data_m_100s,
+    x = ~start, xend = ~end,
+    y = ~Event, yend = ~Event,
+    showlegend = FALSE,
+    line = list(color = "#A9A9A9", width = 4)
+  ) %>%
+  add_markers(
+    data = prep26_m_100s,
+    x = ~Time2,
+    y = ~Event,
+    color = ~Tag,
+    marker = list(symbol = "line-ns", size = 20, line = list(width = 6))
+  ) %>%
+  layout(
+    title = list(text = "Time Comparison: Men's 100s",
+                 font = list(size = 24),
+                 y = .99),
+    xaxis = list(title = list(text = "Time (M:SS)",
+                              font = list(size = 20)),
+                 tickvals = tick_seconds_m1,
+                 ticktext = tick_labels_m1,
+                 tickfont = list(size = 15)),
+    yaxis = list(title = "",
+                 tickfont = list(size = 15)),
+    margin = list(l = 100))
+time_comparison_m_100s
+```
+
+Women's 200s.
+Emma Sticklen set the record at NCAA finals last year in the 200 fly.
+Claire Curzan set the record in finals last year in the 200 Back - keep an eye on her this weekend!
+
+```{r}
+line_data_f_200s = prep26_f_200s %>%
+  group_by(Event) %>%
+  summarize(start = min(Time2), end = max(Time2))
+
+# set up tick marks
+tick_seconds_f = seq(98, 130, by = 8)
+tick_labels_f = paste0(floor(tick_seconds_f / 60), ":", 
+                       sprintf("%02d", tick_seconds_f %% 60))
+
+
+time_comparison_f_200s = plot_ly() %>%
+  add_segments(
+    data = line_data_f_200s,
+    x = ~start, xend = ~end,
+    y = ~Event, yend = ~Event,
+    showlegend = FALSE,
+    line = list(color = "#A9A9A9", width = 4)
+  ) %>%
+  add_markers(
+    data = prep26_f_200s,
+    x = ~Time2,
+    y = ~Event,
+    color = ~Tag,
+    marker = list(symbol = "line-ns", size = 20, line = list(width = 6))
+  ) %>%
+  layout(
+    title = list(text = "Time Comparison: Women's 200s",
+                 font = list(size = 24),
+                 y = .99),
+    xaxis = list(title = list(text = "Time (M:SS)",
+                              font = list(size = 20)),
+                 tickvals = tick_seconds_f,
+                 ticktext = tick_labels_f,
+                 tickfont = list(size = 15)),
+    yaxis = list(title = "",
+                 tickfont = list(size = 15)),
+    margin = list(l = 100))
+time_comparison_f_200s
+```
+
+
+Men's 200s.
+Men's 200 fly was won last year by Luca Urlando in 1:36.43, and he broke the record this past fall in 1:36.41. The times are close enough that it seems to overlap.
+
+```{r}
+line_data_m_200s = prep26_m_200s %>%
+  group_by(Event) %>%
+  summarize(start = min(Time2), end = max(Time2))
+
+tick_seconds_m = seq(88, 180, by = 8)
+tick_labels_m = paste0(floor(tick_seconds_m / 60), ":", 
+                       sprintf("%02d", tick_seconds_m %% 60))
+
+time_comparison_m_200s = plot_ly() %>%
+  add_segments(
+    data = line_data_m_200s,
+    x = ~start, xend = ~end,
+    y = ~Event, yend = ~Event,
+    showlegend = FALSE,
+    line = list(color = "#A9A9A9", width = 4)
+  ) %>%
+  add_markers(
+    data = prep26_m_200s,
+    x = ~Time2,
+    y = ~Event,
+    color = ~Tag,
+    marker = list(symbol = "line-ns", size = 20, line = list(width = 6))
+  ) %>%
+  layout(
+    title = list(text = "Time Comparison: Men's 200s",
+                 font = list(size = 24),
+                 y = .99),
+    xaxis = list(title = list(text = "Time (M:SS)",
+                              font = list(size = 20)),
+                 tickvals = tick_seconds_m,
+                 ticktext = tick_labels_m,
+                 tickfont = list(size = 15)),
+    yaxis = list(title = "",
+                 tickfont = list(size = 15)),
+    margin = list(l = 100))
+time_comparison_m_200s
+```
+
 
