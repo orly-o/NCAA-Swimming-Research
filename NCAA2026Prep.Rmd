@@ -3,10 +3,191 @@ title: "Blog4"
 author: "Orly Olbum"
 date: 
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r libraries}
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(plotly)
+```
+
+## Data Prep
+
+```{r data load}
+setwd("/Users/orly/Library/CloudStorage/OneDrive-Personal/Swim Stats/NCAA Swimming")
+prep26 = read.csv("NCAA2026PrepData.csv")
+head(prep26)
+```
+
+Some notes! There are two time columns, one of which shows the time for display and one shows the total seconds. I'll use the second one for calculations and the first one to make it look pretty.
+
+For each event, by sex, I want to show the current NCAA record, last year's winning time, and this year's top time. I have all three in the same dataset, labeled with the "Tag" column. While I don't have the meet where each record or swim was done, we can use the dates to guess. In some cases, records were set in last year's championship meet.
+
+Summary stats to start: how many current records do we have by school?
+
+```{r}
+# Pull just the current records by school, count
+count_current_record = prep26 %>%
+  filter(Tag == 'Current NCAA Record') %>%
+  group_by(Team) %>%
+  summarize(Count = n()) %>%
+  as.data.frame()
+count_current_record$Team = reorder(as.factor(count_current_record$Team), count_current_record$Count)
+count_current_record
+```
+
+```{r}
+# plot it!
+count_current_record_plot = plot_ly(
+  data = count_current_record,
+  x = ~Count,
+  y = ~Team,
+  type = 'bar',
+  marker = list(
+    color = '#014F86'
+  ),
+  orientation = 'h'
+) %>%
+  layout(
+    title = list(
+      text = "Current Individual NCAA Records by School (M&F)",
+      font = list(
+        size = 24
+      ),
+      y = .99
+    ),
+    xaxis = list(
+      title = list(
+        text = "Records",
+        font = list(
+          size = 20
+        )
+    ),
+    tickfont = list(
+        size = 15
+      )
+    ),
+    yaxis = list(
+      title = list(
+        text = "Team",
+        font = list(
+          size = 20
+        ),
+        standoff = 10
+      ),
+      tickfont = list(
+        size = 15
+      )
+    )
+  )
+count_current_record_plot
+```
+
+Going to plot lines that compare the times for: last year's champion, the current NCAA record, and this year's season best. I'll split it up in groups of events and by sex. 50s together, 100s together, 200s together, then 400 IM/500 together and 1650 alone.
+
+Going to just do 100s and 200s for now.
+
+```{r}
+# fifties = c("50 FR")
+hundreds = c("100 FR", "100 BR", "100 BK", "100 FL")
+twohundreds = c("200 FR", "200 BR", "200 BK", "200 FL", "200 IM")
+# middist = c("400 IM", "500 FR")
+# mile = "1650 FR"
+
+# women
+prep26_f_100s = prep26 %>%
+  filter(Sex == "F") %>%
+  filter(Event %in% hundreds)
+
+prep26_f_200s = prep26 %>%
+  filter(Sex == "F") %>%
+  filter(Event %in% twohundreds)
+
+# men
+prep26_m_100s = prep26 %>%
+  filter(Sex == "M") %>%
+  filter(Event %in% hundreds)
+
+prep26_m_200s = prep26 %>%
+  filter(Sex == "M") %>%
+  filter(Event %in% twohundreds)
+```
+
+Source:
+```{r}
+# # find start and end points (lo and hi)
+# line_data_all = prep26 %>%
+#   group_by(Event) %>%
+#   summarize(start = min(Time2), end = max(Time2))
+# 
+# # 3. Create the Plot
+# time_comparison = plot_ly() %>%
+#   # Add the horizontal lines connecting the dots
+#   add_segments(
+#     data = line_data_all,
+#     x = ~start, xend = ~end,
+#     y = ~Event, yend = ~Event,
+#     showlegend = FALSE,
+#     line = list(color = "#A9A9A9", width = 2) # Gray connector line
+#   ) %>%
+#   # Add the three dots for each event
+#   add_markers(
+#     data = prep26,
+#     x = ~Time2,
+#     y = ~Event,
+#     color = ~Tag,
+#     marker = list(size = 12)
+#   ) %>%
+#   layout(
+#     title = list(
+#       text = "Last Year's Champ, Current NCAA Record, & This Season's Best",
+#       y = .99
+#     ),
+#     xaxis = list(title = "Time"),
+#     yaxis = list(title = ""),
+#     margin = list(l = 100)
+#   )
+# time_comparison
+```
+
+Women's 100s
+
+```{r}
+# find start and end points (lo and hi)
+line_data_f_100s = prep26_f_100s %>%
+  group_by(Event) %>%
+  summarize(start = min(Time2), end = max(Time2))
+
+# 3. Create the Plot
+time_comparison_f_100s = plot_ly() %>%
+  add_segments(
+    data = line_data_f_100s,
+    x = ~start, xend = ~end,
+    y = ~Event, yend = ~Event,
+    showlegend = FALSE,
+    line = list(color = "#A9A9A9", width = 2)
+  ) %>%
+  add_markers(
+    data = prep26_f_100s,
+    x = ~Time2,
+    y = ~Event,
+    color = ~Tag,
+    marker = list(symbol = "line-ns", size = 20, line = list(width = 3))
+  ) %>%
+  layout(
+    title = list(
+      text = "Time Comparison: Women's 100s",
+      y = .99),
+    xaxis = list(title = "Time"),
+    yaxis = list(title = ""),
+    margin = list(l = 100))
+time_comparison_f_100s
+```
 
